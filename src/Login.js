@@ -14,84 +14,68 @@ function Login() {
 
   useEffect(() => {
     const user = localStorage.getItem("user");
-    const pass = localStorage.getItem("pass");
+    if(user){
+      setLoged(true);
+    }else{
+      return setLoged(false);
+    }
+  }, []);
 
-    if (user !== null) {
-      fetch("http://localhost:3000/loginEncrypt", {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (mode === "login") {
+      fetch(`http://localhost:1000/login/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
-          username: user,
-          password: pass,
+          username: username,
+          password: password,
         }),
       })
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
-            localStorage.setItem("user", data["user"]);
-            localStorage.setItem("pass", data["pass"]);
-          }
-        }
-        );
-    } else {
-      fetch("http://localhost:3000/loginDencrypt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          username: user,
-          password: pass,
-        })
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            setUsername(data["user"]);
-            setPassword(data["pass"]);
+            localStorage.setItem("user", username);    
+            setLoged(true);
+          } else {
+            alert("Usuario o contraseña incorrectos")
           }
         });
-    }
-  }, []);
 
-  const handleSubmit = (e) => {
-    // e.preventDefault();
-    // fetch("http://localhost:3000/login", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "Access-Control-Allow-Origin": "*",
-    //   },
-    //   body: JSON.stringify({
-    //     username: username,
-    //     password: password,
-    //     email: email,
-    //   }),
-    // })
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     if (data.success) {
-    //       setLoged(true);
-    //     }
-    //   });
-    e.preventDefault();
-    if (mode === "login") {
-      alert(`${username} ${password}`);
-    } 
+    }
     if (mode === "signup") {
       if (password !== repeatPassword) {
         alert(`Las contraseñas no coinciden`);
-      }else{
-        alert(`Hola`);
-        setTimeout(() => {
-          window.location.reload();
-        }
-        , 500);
+      } else {
 
+        fetch(`http://localhost:1000/login/signup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password,
+            email: email,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              alert("Usuario creado correctamente");
+              setTimeout(() => {
+                window.location.reload();
+              }, 500);
+            } else {
+              if (data.message === "El usuario ya existe") {
+                alert("El usuario ya existe");
+              }
+            }
+          });
       }
     }
   }
@@ -143,11 +127,11 @@ function Login() {
         </section>
       </>
     )
+
   } else {
     return <Home />
   }
 }
-
 class LoginForm extends React.Component {
   constructor(props) {
     super(props);
@@ -191,7 +175,6 @@ const Input = ({ id, type, label, disabled, data }) => (
     } else if (type === "text") {
       var setUsername = data["set"][2];
       setUsername(document.getElementById(id).value);
-      console.log(setUsername)
     } else {
       var setEmail = data["set"][0];
       setEmail(document.getElementById(id).value);
