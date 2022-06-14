@@ -9,7 +9,7 @@ root.render(
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login />} />
-      <Route path="/settings" element={<Settings />} />
+      <Route exact path="/settings" element={<Settings />} />
     </Routes>
   </BrowserRouter>
 );
